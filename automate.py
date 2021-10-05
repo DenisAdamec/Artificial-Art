@@ -10,5 +10,5 @@ args = parser.parse_args()
 
 while(True):
     #call("git pull origin master",shell=True)
-    call(["python","twitter_post.py"])
+    call(["python", "twitter_post.py"])
     time.sleep(args.sleep)

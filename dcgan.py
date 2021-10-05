@@ -4,7 +4,7 @@ try:
     from tensorflow.keras.models import Sequential, Model
     from tensorflow.keras.optimizers import Adam
     from tensorflow.keras import backend as K
-except: 
+except:
     from keras.layers import Input, Dense, Reshape, Flatten, Dropout, LeakyReLU
     from keras.layers import BatchNormalization, Activation, ZeroPadding2D, UpSampling2D, Conv2D
     from keras.models import Sequential, Model
@@ -14,7 +14,7 @@ import tensorflow as tf
 
 import os
 import argparse
-import glob 
+import glob
 
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 import sys
 
 import numpy as np
+
 
 class DCGAN():
     def __init__(self, img_rows=128, img_cols=128, channels=4, latent_dim=3, loss='binary_crossentropy', name='earth'):
@@ -45,12 +46,12 @@ class DCGAN():
 
         # Build the GAN
         self.build_combined()
-        
+
     def build_combined(self):
         self.discriminator.compile(loss='binary_crossentropy',
-                optimizer=self.optimizer,
-                metrics=['accuracy'])
-        
+                                   optimizer=self.optimizer,
+                                   metrics=['accuracy'])
+
         # The generator takes noise as input and generates imgs
         z = Input(shape=(self.latent_dim,))
         img = self.generator(z)
@@ -63,8 +64,8 @@ class DCGAN():
         # The combined model  (stacked generator and discriminator)
         # Trains the generator to fool the discriminator
         self.combined = Model(z, valid)
-        self.combined.compile(loss=self.loss, optimizer=self.optimizer)    
-    
+        self.combined.compile(loss=self.loss, optimizer=self.optimizer)
+
     def load_weights(self, generator_file=None, discriminator_file=None):
 
         if generator_file:
@@ -72,15 +73,15 @@ class DCGAN():
             generator.load_weights(generator_file)
             self.generator = generator
             print('generator weights loaded')
-    
+
         if discriminator_file:
             discriminator = self.build_discriminator()
             discriminator.load_weights(discriminator_file)
             self.discriminator = discriminator
             print('discriminator weights loaded')
 
-        if generator_file or discriminator_file: 
-            self.build_combined() 
+        if generator_file or discriminator_file:
+            self.build_combined()
             print('build compaied ')
 
     def build_generator(self):
@@ -88,8 +89,9 @@ class DCGAN():
         model = Sequential()
         #model.add(Dense(128, activation="relu", input_dim=self.latent_dim, name="generator_input") )
         #model.add(Dropout(0.1))
-        
-        model.add(Dense(128 * 16 * 16, activation="relu", input_dim=self.latent_dim, name="generator_input") )
+
+        model.add(Dense(128 * 16 * 16, activation="relu",
+                  input_dim=self.latent_dim, name="generator_input"))
         model.add(Dropout(0.3))
         model.add(Reshape((16, 16, 128)))
         #model.add(UpSampling2D())
@@ -99,7 +101,7 @@ class DCGAN():
         model.add(Activation("relu"))
         model.add(Dropout(0.2))
         model.add(UpSampling2D())
-        
+
         model.add(Conv2D(64, kernel_size=5, padding="same"))
         model.add(BatchNormalization(momentum=0.8))
         model.add(Activation("relu"))
@@ -109,12 +111,13 @@ class DCGAN():
         model.add(Conv2D(32, kernel_size=4, padding="same"))
         model.add(BatchNormalization(momentum=0.8))
         model.add(Activation("relu"))
-        
+
         model.add(Conv2D(32, kernel_size=4, padding="same"))
         model.add(BatchNormalization(momentum=0.8))
         model.add(Activation("relu"))
 
-        model.add(Conv2D(self.channels, kernel_size=3, padding="same", activation="sigmoid", name="generator_output"))
+        model.add(Conv2D(self.channels, kernel_size=3, padding="same",
+                  activation="sigmoid", name="generator_output"))
 
         model.summary()
 
@@ -127,10 +130,11 @@ class DCGAN():
 
         model = Sequential()
 
-        model.add(Conv2D(32, kernel_size=3, strides=2, input_shape=self.img_shape, padding="same"))
+        model.add(Conv2D(32, kernel_size=3, strides=2,
+                  input_shape=self.img_shape, padding="same"))
         model.add(LeakyReLU(alpha=0.2))
         model.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
-        model.add(ZeroPadding2D(padding=((0,1),(0,1))))
+        model.add(ZeroPadding2D(padding=((0, 1), (0, 1))))
         model.add(BatchNormalization(momentum=0.8))
         model.add(LeakyReLU(alpha=0.2))
         model.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
@@ -189,14 +193,17 @@ class DCGAN():
 
             # Plot the progress
             if epoch % 10 == 0:
-                print ("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+                print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" %
+                      (epoch, d_loss[0], 100*d_loss[1], g_loss))
 
             # If at save interval => save generated image samples
             if epoch % save_interval == 0:
-                self.save_imgs( "images/{}_{:05d}.png".format(self.name,epoch) )
+                self.save_imgs("images/{}_{:05d}.png".format(self.name, epoch))
                 # self.combined.save_weights("combined_weights ({}).h5".format(self.name)) # https://github.com/keras-team/keras/issues/10949
-                self.generator.save_weights("generator ({}).h5".format(self.name))
-                self.discriminator.save_weights("discriminator ({}).h5".format(self.name))
+                self.generator.save_weights(
+                    "generator ({}).h5".format(self.name))
+                self.discriminator.save_weights(
+                    "discriminator ({}).h5".format(self.name))
 
     def save_imgs(self, name=''):
         r, c = 4, 4
@@ -210,32 +217,34 @@ class DCGAN():
 
         gen_imgs = self.generator.predict(noise)
 
-        fig, axs = plt.subplots(r, c, figsize=(6.72,6.72))
-        plt.subplots_adjust(left=0.05,bottom=0.05,right=0.95,top=0.95, wspace=0.2, hspace=0.2)
+        fig, axs = plt.subplots(r, c, figsize=(6.72, 6.72))
+        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95,
+                            top=0.95, wspace=0.2, hspace=0.2)
 
         cnt = 0
         for i in range(r):
             for j in range(c):
-                axs[i,j].imshow(gen_imgs[cnt])
-                axs[i,j].axis('off')
+                axs[i, j].imshow(gen_imgs[cnt])
+                axs[i, j].axis('off')
                 cnt += 1
 
         if name:
-            fig.savefig(name, facecolor='black' )
-        else: 
-            fig.savefig('{}.png'.format(self.name), facecolor='black' )
+            fig.savefig(name, facecolor='black')
+        else:
+            fig.savefig('{}.png'.format(self.name), facecolor='black')
 
         plt.close()
-    
+
 
 def export_model(saver, model, model_name, input_node_names, output_node_name):
     from tensorflow.python.tools import freeze_graph
     from tensorflow.python.tools import optimize_for_inference_lib
-    
+
     if not os.path.exists('out'):
         os.mkdir('out')
 
-    tf.train.write_graph(K.get_session().graph_def, 'out', model_name + '_graph.pbtxt')
+    tf.train.write_graph(K.get_session().graph_def, 'out',
+                         model_name + '_graph.pbtxt')
 
     saver.save(K.get_session(), 'out/' + model_name + '.chkp')
 
@@ -258,10 +267,9 @@ def export_model(saver, model, model_name, input_node_names, output_node_name):
     print("graph saved!")
 
 
-
 def create_dataset(xSize=128, ySize=128, nSlices=100, resize=0.75, directory='dataset/'):
-    jpgs = glob.glob( '{}*.jpg'.format(directory) )
-    pngs = glob.glob( '{}*.png'.format(directory) )
+    jpgs = glob.glob('{}*.jpg'.format(directory))
+    pngs = glob.glob('{}*.png'.format(directory))
 
     allimages = jpgs + pngs
 
@@ -274,24 +282,27 @@ def create_dataset(xSize=128, ySize=128, nSlices=100, resize=0.75, directory='da
         img = Image.open(allimages[i])
 
         if resize != 1:
-            img.thumbnail((img.size[0]*resize, img.size[1]*resize), Image.LANCZOS) # resizes image in-place
+            # resizes image in-place
+            img.thumbnail(
+                (img.size[0]*resize, img.size[1]*resize), Image.LANCZOS)
 
-        img_data = np.array(list(img.getdata())).reshape( (img.size[1],img.size[0],-1) ) 
+        img_data = np.array(list(img.getdata())).reshape(
+            (img.size[1], img.size[0], -1))
 
         for n in range(nSlices):
 
-            # create random slices 
-            rx = np.random.randint( img.size[0]-xSize)
-            ry = np.random.randint( img.size[1]-ySize)
-        
+            # create random slices
+            rx = np.random.randint(img.size[0]-xSize)
+            ry = np.random.randint(img.size[1]-ySize)
+
             # pull out portion of ccd
             sub = np.copy(img_data[ry:ry+ySize, rx:rx+xSize]).astype(float)
 
             #x_train.append( preprocessing.scale(sub) )
-            x_train.append( sub[:,:,:3]  ) 
-            y_train.append( [rx,ry] )
+            x_train.append(sub[:, :, :3])
+            y_train.append([rx, ry])
 
     x_train = np.array(x_train)
     y_train = np.array(y_train)
-    
+
     return (x_train, y_train)
