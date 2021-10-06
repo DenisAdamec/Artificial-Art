@@ -5,11 +5,11 @@ try:
     from tensorflow.keras.optimizers import Adam
     from tensorflow.keras import backend as K
 except:
-    from keras.layers import Input, Dense, Reshape, Flatten, Dropout, LeakyReLU
-    from keras.layers import BatchNormalization, Activation, ZeroPadding2D, UpSampling2D, Conv2D
-    from keras.models import Sequential, Model
-    from keras.optimizers import Adam
-    from keras import backend as K
+    from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, LeakyReLU
+    from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, UpSampling2D, Conv2D
+    from tensorflow.keras.models import Sequential, Model
+    from tensorflow.keras.optimizers import Adam
+    from tensorflow.keras import backend as K
 import tensorflow as tf
 
 import os
